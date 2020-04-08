@@ -1,0 +1,79 @@
+syntax = "proto3";
+package cdkey.api.rpc.v1;
+option go_package = "api/grpc/v1";
+
+// 礼包
+message GiftBag {
+    int32 id = 1;           // 礼包ID
+    string code = 2;        // 礼包码
+    string name = 3;        // 礼包名
+    string app = 4;         // 应用
+    int32 length = 5;       // 长度类型
+    GiftBagState state = 6; // 礼包状态
+    int32 start_time = 7;   // 开始时间
+    int32 end_time = 8;     // 结束时间
+    string description = 9; // 描述
+    int32 time = 10;        // 创建时间
+}
+
+// 礼包状态
+enum GiftBagState {
+    Closed = 0;     // 已关闭
+    Working = 1;    // 使用中
+    Producing = 2;  // 生产中
+}
+
+// 礼包批次
+message Batch {
+    int32 giftbag_id = 1;   // 礼包id
+    string code = 2;        // 批次
+    int32 total = 3;        // 生产数量
+    int32 used = 4;         // 使用数量
+    int32 time = 5;         // 创建时间
+    int32 version = 6;      // 版本
+}
+
+// 礼包邮件
+message Mail {
+    int32 giftbag_id = 1;       // 礼包id
+    string title = 2;           // 标题
+    string content = 3;         // 内容
+    repeated Item items = 4;    // 道具列表
+}
+
+// 邮件道具
+message Item {
+    uint32 id = 1;  // 道具id
+    uint32 num = 2; // 数量
+}
+
+// 兑换码
+message Cdkey {
+    uint32 giftbag_id = 1;  // 礼包ID
+    string code = 2;        // 兑换码
+    uint32 is_used = 3;     // 状态
+    int32 version = 4;      // 版本
+}
+
+// 领取记录
+message Record {
+    uint32 id = 1;          // 日志id
+    int32 giftbag_id = 2;   // 礼包ID
+    string cdkey = 3;       // 兑换码
+    string app = 4;         // 应用
+    uint32 role_id = 5;     // 角色id
+    string name = 6;        // 角色名称
+    string account = 7;     // 账号
+    uint32 time = 8;        // 创建时间
+}
+
+// 获取礼包列表
+message GetGiftbagListRequest {
+    string app = 1;
+    string name = 2;
+}
+
+// 获取礼包列表
+message GetGiftbagListResponse {
+    repeated GiftBag list = 1;
+}

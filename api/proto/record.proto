@@ -1,0 +1,15 @@
+syntax = "proto3";
+package cdkey.api.rpc.v1;
+option go_package = "api/grpc/v1";
+
+// 领取记录
+message Record {
+    uint32 id = 1;          // 日志id
+    int32 giftbag_id = 2;   // 礼包ID
+    string cdkey = 3;       // 兑换码
+    string app = 4;         // 应用
+    uint32 role_id = 5;     // 角色id
+    string name = 6;        // 角色名称
+    string account = 7;     // 账号
+    uint32 time = 8;        // 创建时间
+}
