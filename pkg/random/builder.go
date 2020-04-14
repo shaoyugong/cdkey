@@ -12,7 +12,15 @@ const LowercaseBytes = "abcdefghijklmnopqrstuvwxyz"
 const NumberBytes    = "1234567890"
 
 var (
+	typesOnce sync.Once
 	typesBuilder = &builder{}
+	letterOnce sync.Once
+	letterBuilder = &builder{}
+	uppercaseOnce sync.Once
+	uppercaseBuilder = &builder{}
+	lowercaseOnce sync.Once
+	lowercaseBuilder = &builder{}
+
 )
 
 type Builder interface {
@@ -20,71 +28,54 @@ type Builder interface {
 }
 
 type builder struct {
-	mutex sync.Mutex
 	dictionary *Dictionary
 	source rand.Source
 }
 
 func Bytes() *builder {
-	typesBuilder.mutex.Lock()
-	defer typesBuilder.mutex.Unlock()
-	if typesBuilder.dictionary != nil && typesBuilder.source != nil {
-		return typesBuilder
-	}
-
-	var b strings.Builder
-	b.WriteString(UppercaseBytes)
-	b.WriteString(LowercaseBytes)
-	b.WriteString(NumberBytes)
-	typesBuilder.dictionary = New(b.String(),6)
-	typesBuilder.source = source
+	typesOnce.Do(func() {
+		var b strings.Builder
+		b.WriteString(UppercaseBytes)
+		b.WriteString(LowercaseBytes)
+		b.WriteString(NumberBytes)
+		typesBuilder.dictionary = New(b.String(),6)
+		typesBuilder.source = source
+	})
 	return typesBuilder
 }
 
 // create a dictionary by Uppercase and Lowercase
 func Letter() *builder {
-	typesBuilder.mutex.Lock()
-	defer typesBuilder.mutex.Unlock()
-	if typesBuilder.dictionary != nil && typesBuilder.source != nil {
-		return typesBuilder
-	}
-
-	var b strings.Builder
-	b.WriteString(UppercaseBytes)
-	b.WriteString(LowercaseBytes)
-	typesBuilder.dictionary = New(b.String(),6)
-	typesBuilder.source = source
-	return typesBuilder
+	letterOnce.Do(func() {
+		var b strings.Builder
+		b.WriteString(UppercaseBytes)
+		b.WriteString(LowercaseBytes)
+		letterBuilder.dictionary = New(b.String(),6)
+		letterBuilder.source = source
+	})
+	return letterBuilder
 }
 
 // create a dictionary by Uppercase
 func Uppercase() *builder {
-	typesBuilder.mutex.Lock()
-	defer typesBuilder.mutex.Unlock()
-	if typesBuilder.dictionary != nil && typesBuilder.source != nil {
-		return typesBuilder
-	}
-
-	var b strings.Builder
-	b.WriteString(UppercaseBytes)
-	typesBuilder.dictionary = New(b.String(),5)
-	typesBuilder.source = source
-	return typesBuilder
+	uppercaseOnce.Do(func() {
+		var b strings.Builder
+		b.WriteString(UppercaseBytes)
+		uppercaseBuilder.dictionary = New(b.String(),5)
+		uppercaseBuilder.source = source
+	})
+	return uppercaseBuilder
 }
 
 // create a dictionary by Lowercase
 func Lowercase() *builder {
-	typesBuilder.mutex.Lock()
-	defer typesBuilder.mutex.Unlock()
-	if typesBuilder.dictionary != nil && typesBuilder.source != nil {
-		return typesBuilder
-	}
-
-	var b strings.Builder
-	b.WriteString(LowercaseBytes)
-	typesBuilder.dictionary = New(b.String(),5)
-	typesBuilder.source = source
-	return typesBuilder
+	lowercaseOnce.Do(func() {
+		var b strings.Builder
+		b.WriteString(LowercaseBytes)
+		lowercaseBuilder.dictionary = New(b.String(),5)
+		lowercaseBuilder.source = source
+	})
+	return lowercaseBuilder
 }
 
 // generate string according to length
