@@ -5,30 +5,30 @@ import "testing"
 var length = 12
 var number = 1
 
-//// cmd: go test -bench=. -run=non
-//func BenchmarkDictionary(b *testing.B) {
-//	for i := 0; i < b.N; i++ {
-//		Bytes().Generate(length)
-//	}
-//}
-//
-//func BenchmarkLetter(b *testing.B) {
-//	for i := 0; i < b.N; i++ {
-//		Letter().Generate(length)
-//	}
-//}
-//
-//func BenchmarkUppercase(b *testing.B) {
-//	for i := 0; i < b.N; i++ {
-//		Uppercase().Generate(length)
-//	}
-//}
-//
-//func BenchmarkLowercase(b *testing.B) {
-//	for i := 0; i < b.N; i++ {
-//		Lowercase().Generate(length)
-//	}
-//}
+// cmd: go test -bench=. -run=non
+func BenchmarkDictionary(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		Bytes().Generate(length)
+	}
+}
+
+func BenchmarkLetter(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		Letter().Generate(length)
+	}
+}
+
+func BenchmarkUppercase(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		Uppercase().Generate(length)
+	}
+}
+
+func BenchmarkLowercase(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		Lowercase().Generate(length)
+	}
+}
 
 func Test_Dictionary(t *testing.T) {
 	for i := 0; i < number; i++ {
