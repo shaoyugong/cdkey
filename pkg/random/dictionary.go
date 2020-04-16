@@ -1,5 +1,7 @@
 package random
 
+import "strconv"
+
 type Dictionary struct {
 	bytes string
 	index Index
@@ -24,9 +26,14 @@ func (d *Dictionary) SetIndex(bits int) *Dictionary {
 }
 
 // create a dictionary by custom string
-func New(bytes string, bits int) *Dictionary {
+func NewDictionary(bytes string, bits int) *Dictionary {
 	dict := &Dictionary{}
 	dict.SetBytes(bytes)
 	dict.SetIndex(bits)
 	return dict
+}
+
+// get bits of string
+func GetBytesBits(bytes string) int {
+	return len(strconv.FormatInt(int64(len(bytes)), 2))
 }

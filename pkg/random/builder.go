@@ -20,7 +20,6 @@ var (
 	uppercaseBuilder = &builder{}
 	lowercaseOnce sync.Once
 	lowercaseBuilder = &builder{}
-
 )
 
 type Builder interface {
@@ -32,48 +31,52 @@ type builder struct {
 	source rand.Source
 }
 
+// create builder
+func NewBuilder(bytes ...string) *builder {
+	var bud strings.Builder
+	for _, b := range bytes {
+		bud.WriteString(b)
+	}
+
+	strs := bud.String()
+	bits := GetBytesBits(strs)
+	dict := NewDictionary(strs, bits)
+	return &builder{
+		dictionary: dict,
+		source: source,
+	}
+}
+
 func Bytes() *builder {
 	typesOnce.Do(func() {
-		var b strings.Builder
-		b.WriteString(UppercaseBytes)
-		b.WriteString(LowercaseBytes)
-		b.WriteString(NumberBytes)
-		typesBuilder.dictionary = New(b.String(),6)
-		typesBuilder.source = source
+		typesBuilder = NewBuilder(UppercaseBytes, LowercaseBytes, NumberBytes)
 	})
+
 	return typesBuilder
 }
 
 // create a dictionary by Uppercase and Lowercase
 func Letter() *builder {
 	letterOnce.Do(func() {
-		var b strings.Builder
-		b.WriteString(UppercaseBytes)
-		b.WriteString(LowercaseBytes)
-		letterBuilder.dictionary = New(b.String(),6)
-		letterBuilder.source = source
+		letterBuilder = NewBuilder(UppercaseBytes, LowercaseBytes)
 	})
+
 	return letterBuilder
 }
 
 // create a dictionary by Uppercase
 func Uppercase() *builder {
 	uppercaseOnce.Do(func() {
-		var b strings.Builder
-		b.WriteString(UppercaseBytes)
-		uppercaseBuilder.dictionary = New(b.String(),5)
-		uppercaseBuilder.source = source
+		uppercaseBuilder = NewBuilder(UppercaseBytes)
 	})
+
 	return uppercaseBuilder
 }
 
 // create a dictionary by Lowercase
 func Lowercase() *builder {
 	lowercaseOnce.Do(func() {
-		var b strings.Builder
-		b.WriteString(LowercaseBytes)
-		lowercaseBuilder.dictionary = New(b.String(),5)
-		lowercaseBuilder.source = source
+		lowercaseBuilder = NewBuilder(LowercaseBytes)
 	})
 	return lowercaseBuilder
 }
