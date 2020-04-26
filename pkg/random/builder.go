@@ -1,104 +1,56 @@
 package random
 
 import (
+	"fmt"
 	"math/rand"
-	"strings"
-	"sync"
+	"strconv"
+	"time"
 	"unsafe"
 )
 
-const UppercaseBytes = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-const LowercaseBytes = "abcdefghijklmnopqrstuvwxyz"
-const NumberBytes    = "1234567890"
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
 
-var (
-	typesOnce sync.Once
-	typesBuilder = &builder{}
-	letterOnce sync.Once
-	letterBuilder = &builder{}
-	uppercaseOnce sync.Once
-	uppercaseBuilder = &builder{}
-	lowercaseOnce sync.Once
-	lowercaseBuilder = &builder{}
-)
+func NewBuilder(bytes string) (*builder, error) {
+	if bytes == "" {
+		return nil, fmt.Errorf("source: %s can not be empty", bytes)
+	}
 
-type Builder interface {
-	Generate(length int) string
+	indexBits := len(strconv.FormatInt(int64(len(bytes)), 2))
+	p := &builder{
+		source: bytes,
+		indexBits: indexBits,
+		indexMask: 1 << indexBits - 1,
+		indexMax:  63 / indexBits,
+	}
+
+	return p, nil
 }
 
 type builder struct {
-	dictionary *Dictionary
-	source rand.Source
+	source    string
+	indexBits int
+	indexMask int64
+	indexMax  int
 }
 
-// create builder
-func NewBuilder(bytes ...string) *builder {
-	var bud strings.Builder
-	for _, b := range bytes {
-		bud.WriteString(b)
-	}
-
-	strs := bud.String()
-	bits := GetBytesBits(strs)
-	dict := NewDictionary(strs, bits)
-	return &builder{
-		dictionary: dict,
-		source: source,
-	}
-}
-
-func Bytes() *builder {
-	typesOnce.Do(func() {
-		typesBuilder = NewBuilder(UppercaseBytes, LowercaseBytes, NumberBytes)
-	})
-
-	return typesBuilder
-}
-
-// create a dictionary by Uppercase and Lowercase
-func Letter() *builder {
-	letterOnce.Do(func() {
-		letterBuilder = NewBuilder(UppercaseBytes, LowercaseBytes)
-	})
-
-	return letterBuilder
-}
-
-// create a dictionary by Uppercase
-func Uppercase() *builder {
-	uppercaseOnce.Do(func() {
-		uppercaseBuilder = NewBuilder(UppercaseBytes)
-	})
-
-	return uppercaseBuilder
-}
-
-// create a dictionary by Lowercase
-func Lowercase() *builder {
-	lowercaseOnce.Do(func() {
-		lowercaseBuilder = NewBuilder(LowercaseBytes)
-	})
-	return lowercaseBuilder
-}
-
-// generate string according to length
-func (b *builder) Generate(length int) string {
-	bytes := make([]byte, length)
-
-	//  A rand.dictionary.Int63() generates 63 random bits, enough for letterIdxMax letters!
-	for i, cache, remain := length - 1, b.source.Int63(), b.dictionary.index.max; i >= 0; {
+// generate string according to indexBits
+func (p *builder) Generate(length int) string {
+	codes := make([]byte, length)
+	for i, number, remain := length - 1, rand.Int63(), p.indexMax; i >= 0; {
 		if remain == 0 {
-			cache, remain = b.source.Int63(), b.dictionary.index.max
+			number, remain = rand.Int63(), p.indexMax
 		}
 
-		if idx := int(cache & b.dictionary.index.mask); idx < len(b.dictionary.bytes) {
-			bytes[i] = b.dictionary.bytes[idx]
+		if idx := int(number & p.indexMask); idx < len(p.source) {
+			codes[i] = p.source[idx]
 			i--
 		}
 
-		cache >>= b.dictionary.index.bits
+		number >>= p.indexBits
 		remain--
 	}
 
-	return *(*string)(unsafe.Pointer(&bytes))
+	return *(*string)(unsafe.Pointer(&codes))
 }
